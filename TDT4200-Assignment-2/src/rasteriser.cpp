@@ -6,6 +6,8 @@
 #include <limits>
 
 const std::vector<globalLight> lightSources = { {{0.3f, 0.5f, 1.0f}, {1.0f, 1.0f, 1.0f}} };
+int lol =0;
+int lel=0;
 
 typedef struct perfCounter {
 	unsigned long meshs = 0;
@@ -161,7 +163,7 @@ void runVertexTriangles(
 			}
 
 }
-/*
+
 void renderMeshFractal(
 				std::vector<Mesh> &meshes,
 				std::vector<Mesh> &transformedMeshes,
@@ -178,14 +180,10 @@ void renderMeshFractal(
 	//For loop her because the mesh has to be rendered at every dept??
 	// Start by rendering the mesh at this depth
 		std::cout << "deptlimit: " << depthLimit<<std::endl;
-				std::cout << "scale: " << distanceOffset<<std::endl;
-		//runVertexTriangles(meshes,transformedMeshes,width,height,frameBuffer,depthBuffer,scale,distanceOffset);
-	for (unsigned int i = 0; i < meshes.size(); i++) {
-		Mesh &mesh = meshes.at(i);
-		Mesh &transformedMesh = transformedMeshes.at(i);
-		runVertexShader(mesh, transformedMesh, distanceOffset, scale, width, height);
-		rasteriseTriangles(transformedMesh, frameBuffer, depthBuffer, width, height);
-	}
+		lol++;
+		std::cout << "timesRun: " << lol<<std::endl;
+		runVertexTriangles(meshes,transformedMeshes,width,height,frameBuffer,depthBuffer,scale,distanceOffset);
+
 
 	// Check whether we've reached the recursive depth of the fractal we want to reach
 	depthLimit--;
@@ -198,7 +196,9 @@ void renderMeshFractal(
 	for(int offsetX = -1; offsetX <= 1; offsetX++) {
 		for(int offsetY = -1; offsetY <= 1; offsetY++) {
 			for(int offsetZ = -1; offsetZ <= 1; offsetZ++) {
-						std::cout << "OFFSETT: " << " x:" << offsetX <<" y:"<<offsetY << " z:"<< offsetZ <<std::endl;
+					//	std::cout << "OFFSETT: " << " x:" << offsetX <<" y:"<<offsetY << " z:"<< offsetZ <<std::endl;
+					lel++;
+					std::cout << "timesRunInLoop: " << lel<<std::endl;
 				float3 offset(offsetX,offsetY,offsetZ);
 				// We draw the new objects in a grid around the "main" one.
 				// We thus skip the location of the object itself.
@@ -216,7 +216,7 @@ void renderMeshFractal(
 		}
 	}
 
-}*/
+} /*
 void renderMeshFractal(
 				std::vector<Mesh> &meshes,
 				std::vector<Mesh> &transformedMeshes,
@@ -244,7 +244,7 @@ void renderMeshFractal(
 	// Check whether we've reached the recursive depth of the fractal we want to reach
 	depthLimit--;
 
-
+//Create a stack of all of all variables which are changing then iterate through them. 
 for(int j = 0; j<depthLimit; j++){
 				std::cout << "j: " << j <<  std::endl;
 			// Now we recursively draw the meshes in a smaller size
@@ -274,7 +274,7 @@ for(int j = 0; j<depthLimit; j++){
 			}
 		}
 	}
-}
+}*/
 
 
 
