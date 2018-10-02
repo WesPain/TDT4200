@@ -162,7 +162,7 @@ void runVertexTriangles(
 				rasteriseTriangles(transformedMesh, frameBuffer, depthBuffer, width, height);
 			}
 
-}
+}/*
 
 void renderMeshFractal(
 				std::vector<Mesh> &meshes,
@@ -216,7 +216,7 @@ void renderMeshFractal(
 		}
 	}
 
-} /*
+}*/
 void renderMeshFractal(
 				std::vector<Mesh> &meshes,
 				std::vector<Mesh> &transformedMeshes,
@@ -229,6 +229,9 @@ void renderMeshFractal(
 					//Remove some paramteres from arg
 				float scale = 1.0;
 				float3 distanceOffset = {0, 0, 0};
+				std::vector<float3> offsetStack;
+				std::vector<float> scaleStack;
+				//Iterate over this and add the index to the encapsulated function.
 
 
 		while((depthLimit!=0)){
@@ -244,7 +247,7 @@ void renderMeshFractal(
 	// Check whether we've reached the recursive depth of the fractal we want to reach
 	depthLimit--;
 
-//Create a stack of all of all variables which are changing then iterate through them. 
+//Create a stack of all of all variables which are changing then iterate through them.
 for(int j = 0; j<depthLimit; j++){
 				std::cout << "j: " << j <<  std::endl;
 			// Now we recursively draw the meshes in a smaller size
@@ -274,7 +277,7 @@ for(int j = 0; j<depthLimit; j++){
 			}
 		}
 	}
-}*/
+}
 
 
 
