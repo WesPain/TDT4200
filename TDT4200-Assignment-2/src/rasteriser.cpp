@@ -155,6 +155,7 @@ void runVertexTriangles(
 		) {
 	//For loop her because the mesh has to be rendered at every dept??
 	// Start by rendering the mesh at this depth
+
 			for (unsigned int i = 0; i < meshes.size(); i++) {
 				Mesh &mesh = meshes.at(i);
 				Mesh &transformedMesh = transformedMeshes.at(i);
@@ -162,8 +163,9 @@ void runVertexTriangles(
 				rasteriseTriangles(transformedMesh, frameBuffer, depthBuffer, width, height);
 			}
 
-}/*
+}
 
+/*
 void renderMeshFractal(
 				std::vector<Mesh> &meshes,
 				std::vector<Mesh> &transformedMeshes,
@@ -179,7 +181,7 @@ void renderMeshFractal(
 
 	//For loop her because the mesh has to be rendered at every dept??
 	// Start by rendering the mesh at this depth
-		std::cout << "deptlimit: " << depthLimit<<std::endl;
+
 		lol++;
 		std::cout << "timesRun: " << lol<<std::endl;
 		runVertexTriangles(meshes,transformedMeshes,width,height,frameBuffer,depthBuffer,scale,distanceOffset);
@@ -187,22 +189,25 @@ void renderMeshFractal(
 
 	// Check whether we've reached the recursive depth of the fractal we want to reach
 	depthLimit--;
+	std::cout << "deptlimit: " << depthLimit<<std::endl;
 	if(depthLimit == 0) {
 		std::cout << "One out"<<std::endl;
 		return;
 	}
-
+//	std::cout << "deptlimit: " << depthLimit<<std::endl;
+	std::cout << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW" <<std::endl;
 	// Now we recursively draw the meshes in a smaller size
 	for(int offsetX = -1; offsetX <= 1; offsetX++) {
 		for(int offsetY = -1; offsetY <= 1; offsetY++) {
 			for(int offsetZ = -1; offsetZ <= 1; offsetZ++) {
-					//	std::cout << "OFFSETT: " << " x:" << offsetX <<" y:"<<offsetY << " z:"<< offsetZ <<std::endl;
+						std::cout << "OFFSETT: " << " x:" << offsetX <<" y:"<<offsetY << " z:"<< offsetZ <<std::endl;
 					lel++;
 					std::cout << "timesRunInLoop: " << lel<<std::endl;
 				float3 offset(offsetX,offsetY,offsetZ);
 				// We draw the new objects in a grid around the "main" one.
 				// We thus skip the location of the object itself.
 				if(offset == 0) {
+						std::cout << "|||||||||||||||||||||||||||||||||||||||: " <<std::endl;
 					continue;
 				}
 
@@ -229,14 +234,15 @@ void renderMeshFractal(
 					//Remove some paramteres from arg
 				float scale = 1.0;
 				float3 distanceOffset = {0, 0, 0};
-				std::vector<float3> offsetStack;
-				std::vector<float> scaleStack;
+
+
+
 				//Iterate over this and add the index to the encapsulated function.
 
 
-		while((depthLimit!=0)){
-			std::cout << "deptlimit: " << depthLimit <<  std::endl;
-			std::cout << "meshsize: " << meshes.size() <<  std::endl;
+		//while((depthLimit!=0)){
+			//std::cout << "deptlimit: " << depthLimit <<  std::endl;
+			//std::cout << "meshsize: " << meshes.size() <<  std::endl;
 
 	//For loop her because the mesh has to be rendered at every dept??
 	// Start by rendering the mesh at this depth
@@ -245,16 +251,15 @@ void renderMeshFractal(
 
 
 	// Check whether we've reached the recursive depth of the fractal we want to reach
-	depthLimit--;
+	//depthLimit--;
 
 //Create a stack of all of all variables which are changing then iterate through them.
-for(int j = 0; j<depthLimit; j++){
-				std::cout << "j: " << j <<  std::endl;
-			// Now we recursively draw the meshes in a smaller size
+
+
 			for(int offsetX = -1; offsetX <= 1; offsetX++) {
 				for(int offsetY = -1; offsetY <= 1; offsetY++) {
 					for(int offsetZ = -1; offsetZ <= 1; offsetZ++) {
-						std::cout << "OFFSETT: " << " x:" << offsetX <<" y:"<<offsetY << " z:"<< offsetZ <<std::endl;
+					//	std::cout << "OFFSETT: " << " x:" << offsetX <<" y:"<<offsetY << " z:"<< offsetZ <<std::endl;
 						float3 offset(offsetX,offsetY,offsetZ);
 						// We draw the new objects in a grid around the "main" one.
 						// We thus skip the location of the object itself.
@@ -273,11 +278,47 @@ for(int j = 0; j<depthLimit; j++){
 
 						//runVertexTriangles(meshes,transformedMeshes,width,height,frameBuffer,depthBuffer,scale,distanceOffset);
 					//renderMeshFractal(meshes, transformedMeshes, width, height, frameBuffer, depthBuffer, largestBoundingBoxSide, depthLimit, smallerScale, displacedOffset);
-				}}
+				}
+
 			}
-		}
+
 	}
+
+}//Temp lol
+void IterativeNestedLoop(int depth, int max)
+{
+    // Initialize the slots to hold the current iteration value for each depth
+    int* slots = (int*)alloca(sizeof(int) * depth);
+    for (int i = 0; i < depth; i++)
+    {
+        slots[i] = 0;
+    }
+
+    int index = 0;
+    while (true)
+    {
+        // TODO: Your inner loop code goes here. You can inspect the values in slots
+
+        // Increment
+        slots[0]++;
+
+        // Carry
+        while (slots[index] == max)
+        {
+            // Overflow, we're done
+            if (index == depth - 1)
+            {
+                return;
+            }
+
+            slots[index++] = 0;
+            slots[index]++;
+        }
+
+        index = 0;
+    }
 }
+
 
 
 
