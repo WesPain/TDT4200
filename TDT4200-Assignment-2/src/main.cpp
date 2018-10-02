@@ -11,6 +11,11 @@ int main(int argc, char **argv) {
 	unsigned int height = 1080;
 	unsigned int depth = 3;
 
+	//int rank, size;
+	//MPI_Init(NULL,NULL);
+	//MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+	//MPI_Comm_size(MPI_COMM_WORLD, &size);
+
 	for (int i = 1; i < argc; i++) {
 		if (i < argc -1) {
 			if (std::strcmp("-i", argv[i]) == 0) {
