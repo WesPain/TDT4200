@@ -5,9 +5,10 @@
 #include <chrono>
 #include <limits>
 
+#include <cstdlib>
+#include "mpi.h"
+
 const std::vector<globalLight> lightSources = { {{0.3f, 0.5f, 1.0f}, {1.0f, 1.0f, 1.0f}} };
-int lol =0;
-int lel=0;
 
 typedef struct perfCounter {
 	unsigned long meshs = 0;
@@ -22,7 +23,7 @@ void runVertexShader( Mesh &mesh,
                       float scale,
 					  unsigned int const width,
 					  unsigned int const height,
-				  	  float const rotationAngle = 0)
+				  	  float rotationAngle=0)
 {
 	float const pi = std::acos(-1);
 	// The matrices defined below are the ones used to transform the vertices and normals.
@@ -143,29 +144,7 @@ void rasteriseTriangles( Mesh &transformedMesh,
 		}
 	}
 }
-void runVertexTriangles(
-		std::vector<Mesh> &meshes,
-		std::vector<Mesh> &transformedMeshes,
-		unsigned int width,
-		unsigned int height,
-		std::vector<unsigned char> &frameBuffer,
-		std::vector<float> &depthBuffer,
-		float scale,
-		float3 distanceOffset
-		) {
-	//For loop her because the mesh has to be rendered at every dept??
-	// Start by rendering the mesh at this depth
 
-			for (unsigned int i = 0; i < meshes.size(); i++) {
-				Mesh &mesh = meshes.at(i);
-				Mesh &transformedMesh = transformedMeshes.at(i);
-				runVertexShader(mesh, transformedMesh, distanceOffset, scale, width, height);
-				rasteriseTriangles(transformedMesh, frameBuffer, depthBuffer, width, height);
-			}
-
-}
-
-/*
 void renderMeshFractal(
 				std::vector<Mesh> &meshes,
 				std::vector<Mesh> &transformedMeshes,
@@ -176,38 +155,52 @@ void renderMeshFractal(
 				float largestBoundingBoxSide,
 				int depthLimit,
 				float scale = 1.0,
-				float3 distanceOffset = {0, 0, 0}) {
+				float3 distanceOffset = {0, 0, 0},
+				int count=0) {
 
+ 						count++;
+						int world_rank;
+						MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+						int world_size;
+						MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+						std::cout << "count" << count<<std::endl;
 
-	//For loop her because the mesh has to be rendered at every dept??
+						if(world_size>1){
+								if(world_rank==0){
+
+									for(int i=1; i<world_size; i++){
+										int count_send = count;
+										MPI_Send(&count_send, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+
+									}
+								}
+								else{
+									MPI_Recv(&count, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+								}
+							}
+  if(count % world_size == world_rank){
 	// Start by rendering the mesh at this depth
-
-		lol++;
-		std::cout << "timesRun: " << lol<<std::endl;
-		runVertexTriangles(meshes,transformedMeshes,width,height,frameBuffer,depthBuffer,scale,distanceOffset);
-
+	for (unsigned int i = 0; i < meshes.size(); i++) {
+		Mesh &mesh = meshes.at(i);
+		Mesh &transformedMesh = transformedMeshes.at(i);
+		runVertexShader(mesh, transformedMesh, distanceOffset, scale, width, height);
+		rasteriseTriangles(transformedMesh, frameBuffer, depthBuffer, width, height);
+	}
 
 	// Check whether we've reached the recursive depth of the fractal we want to reach
 	depthLimit--;
-	std::cout << "deptlimit: " << depthLimit<<std::endl;
 	if(depthLimit == 0) {
-		std::cout << "One out"<<std::endl;
 		return;
 	}
-//	std::cout << "deptlimit: " << depthLimit<<std::endl;
-	std::cout << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW" <<std::endl;
+
 	// Now we recursively draw the meshes in a smaller size
 	for(int offsetX = -1; offsetX <= 1; offsetX++) {
 		for(int offsetY = -1; offsetY <= 1; offsetY++) {
 			for(int offsetZ = -1; offsetZ <= 1; offsetZ++) {
-						std::cout << "OFFSETT: " << " x:" << offsetX <<" y:"<<offsetY << " z:"<< offsetZ <<std::endl;
-					lel++;
-					std::cout << "timesRunInLoop: " << lel<<std::endl;
 				float3 offset(offsetX,offsetY,offsetZ);
 				// We draw the new objects in a grid around the "main" one.
 				// We thus skip the location of the object itself.
 				if(offset == 0) {
-						std::cout << "|||||||||||||||||||||||||||||||||||||||: " <<std::endl;
 					continue;
 				}
 
@@ -216,113 +209,12 @@ void renderMeshFractal(
 					distanceOffset + offset * (largestBoundingBoxSide / 2.0f) * scale
 				);
 
-				renderMeshFractal(meshes, transformedMeshes, width, height, frameBuffer, depthBuffer, largestBoundingBoxSide, depthLimit, smallerScale, displacedOffset);
+				renderMeshFractal(meshes, transformedMeshes, width, height, frameBuffer, depthBuffer, largestBoundingBoxSide, depthLimit, smallerScale, displacedOffset,count);
 			}
 		}
-	}
+	}}
 
-}*/
-void renderMeshFractal(
-				std::vector<Mesh> &meshes,
-				std::vector<Mesh> &transformedMeshes,
-				unsigned int width,
-				unsigned int height,
-				std::vector<unsigned char> &frameBuffer,
-				std::vector<float> &depthBuffer,
-				float largestBoundingBoxSide,
-				int depthLimit) {
-					//Remove some paramteres from arg
-				float scale = 1.0;
-				float3 distanceOffset = {0, 0, 0};
-
-
-
-				//Iterate over this and add the index to the encapsulated function.
-
-
-		//while((depthLimit!=0)){
-			//std::cout << "deptlimit: " << depthLimit <<  std::endl;
-			//std::cout << "meshsize: " << meshes.size() <<  std::endl;
-
-	//For loop her because the mesh has to be rendered at every dept??
-	// Start by rendering the mesh at this depth
-
-	runVertexTriangles(meshes,transformedMeshes,width,height,frameBuffer,depthBuffer,scale,distanceOffset);
-
-
-	// Check whether we've reached the recursive depth of the fractal we want to reach
-	//depthLimit--;
-
-//Create a stack of all of all variables which are changing then iterate through them.
-
-
-			for(int offsetX = -1; offsetX <= 1; offsetX++) {
-				for(int offsetY = -1; offsetY <= 1; offsetY++) {
-					for(int offsetZ = -1; offsetZ <= 1; offsetZ++) {
-					//	std::cout << "OFFSETT: " << " x:" << offsetX <<" y:"<<offsetY << " z:"<< offsetZ <<std::endl;
-						float3 offset(offsetX,offsetY,offsetZ);
-						// We draw the new objects in a grid around the "main" one.
-						// We thus skip the location of the object itself.
-						if(offset == 0) {
-							continue;
-						}
-
-						float smallerScale = scale / 3.0;
-						float3 displacedOffset(
-							distanceOffset + offset * (largestBoundingBoxSide / 2.0f) * scale
-						);
-
-						runVertexTriangles(meshes,transformedMeshes,width,height,frameBuffer,depthBuffer,smallerScale,displacedOffset);
-
-
-
-						//runVertexTriangles(meshes,transformedMeshes,width,height,frameBuffer,depthBuffer,scale,distanceOffset);
-					//renderMeshFractal(meshes, transformedMeshes, width, height, frameBuffer, depthBuffer, largestBoundingBoxSide, depthLimit, smallerScale, displacedOffset);
-				}
-
-			}
-
-	}
-
-}//Temp lol
-void IterativeNestedLoop(int depth, int max)
-{
-    // Initialize the slots to hold the current iteration value for each depth
-    int* slots = (int*)alloca(sizeof(int) * depth);
-    for (int i = 0; i < depth; i++)
-    {
-        slots[i] = 0;
-    }
-
-    int index = 0;
-    while (true)
-    {
-        // TODO: Your inner loop code goes here. You can inspect the values in slots
-
-        // Increment
-        slots[0]++;
-
-        // Carry
-        while (slots[index] == max)
-        {
-            // Overflow, we're done
-            if (index == depth - 1)
-            {
-                return;
-            }
-
-            slots[index++] = 0;
-            slots[index]++;
-        }
-
-        index = 0;
-    }
 }
-
-
-
-
-
 
 // This function kicks off the rasterisation process.
 std::vector<unsigned char> rasterise(std::vector<Mesh> &meshes, unsigned int width, unsigned int height, unsigned int depthLimit) {
@@ -360,7 +252,6 @@ std::vector<unsigned char> rasterise(std::vector<Mesh> &meshes, unsigned int wid
 	float3 boundingBoxDimensions = boundingBoxMax - boundingBoxMin;
 	float largestBoundingBoxSide = std::max(std::max(boundingBoxDimensions.x, boundingBoxDimensions.y), boundingBoxDimensions.z);
 
-
 	renderMeshFractal(meshes, transformedMeshes, width, height, frameBuffer, depthBuffer, largestBoundingBoxSide, depthLimit);//depthLimit);
 
 
@@ -368,5 +259,5 @@ std::vector<unsigned char> rasterise(std::vector<Mesh> &meshes, unsigned int wid
 
 	return frameBuffer;
 
-
+//	std::cout << "finished!" << std::endl;mpirun -np 4 cpurender/cpurender -i input/cubes.obj -o output/cubes.png -w 1920 -h 1080 -d 3
 }

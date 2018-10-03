@@ -3,6 +3,7 @@
 #include "utilities/OBJLoader.hpp"
 #include "utilities/lodepng.h"
 #include "rasteriser.hpp"
+#include "mpi.h"
 
 int main(int argc, char **argv) {
 	std::string input("../input/sphere.obj");
@@ -11,10 +12,7 @@ int main(int argc, char **argv) {
 	unsigned int height = 1080;
 	unsigned int depth = 3;
 
-	//int rank, size;
-	//MPI_Init(NULL,NULL);
-	//MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-	//MPI_Comm_size(MPI_COMM_WORLD, &size);
+	MPI_Init(NULL,NULL);
 
 	for (int i = 1; i < argc; i++) {
 		if (i < argc -1) {
@@ -35,6 +33,13 @@ int main(int argc, char **argv) {
 
 	std::vector<Mesh> meshs = loadWavefront(input, false);
 
+	int world_rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+
+
+	std::string substring = output.substr(0, output.find('.'));
+	output = substring + std::to_string(world_rank) + ".png";
+
 	std::vector<unsigned char> frameBuffer = rasterise(meshs, width, height, depth);
 
 	std::cout << "Writing image to '" << output << "'..." << std::endl;
@@ -45,6 +50,7 @@ int main(int argc, char **argv) {
 	{
 		std::cout << "An error occurred while writing the image file: " << error << ": " << lodepng_error_text(error) << std::endl;
 	}
+	MPI_Finalize();
 
 	return 0;
 }
