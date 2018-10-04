@@ -16,6 +16,7 @@ typedef struct perfCounter {
 } perfCounter;
 
 perfCounter counter = {};
+int funcCount=0;
 
 void runVertexShader( Mesh &mesh,
                       Mesh &transformedMesh,
@@ -154,16 +155,22 @@ void renderMeshFractal(
 				std::vector<float> &depthBuffer,
 				float largestBoundingBoxSide,
 				int depthLimit,
+				int& count,
 				float scale = 1.0,
-				float3 distanceOffset = {0, 0, 0},
-				int count=0) {
+				float3 distanceOffset = {0, 0, 0}
+			) {
 
- 						count++;
+ 						++count;
+
+						funcCount++;
 						int world_rank;
 						MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 						int world_size;
 						MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-						std::cout << "count" << count<<std::endl;
+						//std::cout << "function counter: " << funcCount << std::endl;
+						//std::cout << "counter: " << count << std::endl;
+						//std::cout << "world_rank: "<< world_rank << std::endl;
+						//std::cout << "world_size: " << world_size <<std::endl;
 
 						if(world_size>1){
 								if(world_rank==0){
@@ -179,13 +186,17 @@ void renderMeshFractal(
 								}
 							}
   if(count % world_size == world_rank){
+								//std::cout << "Process: "<< world_rank << " is drawing"<< std::endl;
+								//std::cout << "counter: " << count << std::endl;
 	// Start by rendering the mesh at this depth
 	for (unsigned int i = 0; i < meshes.size(); i++) {
 		Mesh &mesh = meshes.at(i);
 		Mesh &transformedMesh = transformedMeshes.at(i);
 		runVertexShader(mesh, transformedMesh, distanceOffset, scale, width, height);
 		rasteriseTriangles(transformedMesh, frameBuffer, depthBuffer, width, height);
-	}
+	}}
+	//Legge til en variable som sjekker modulo hvis sann tegn og kall funskjon hvis falsk ikke tegn og kall funksjon
+	//Huske å enkapsulere finksjonene
 
 	// Check whether we've reached the recursive depth of the fractal we want to reach
 	depthLimit--;
@@ -209,10 +220,10 @@ void renderMeshFractal(
 					distanceOffset + offset * (largestBoundingBoxSide / 2.0f) * scale
 				);
 
-				renderMeshFractal(meshes, transformedMeshes, width, height, frameBuffer, depthBuffer, largestBoundingBoxSide, depthLimit, smallerScale, displacedOffset,count);
+				renderMeshFractal(meshes, transformedMeshes, width, height, frameBuffer, depthBuffer, largestBoundingBoxSide, depthLimit, count,smallerScale, displacedOffset);
 			}
 		}
-	}}
+	}//}
 
 }
 
@@ -221,6 +232,7 @@ std::vector<unsigned char> rasterise(std::vector<Mesh> &meshes, unsigned int wid
 	// We first need to allocate some buffers.
 	// The framebuffer contains the image being rendered.
 	std::vector<unsigned char> frameBuffer;
+	int count=0;
 	// The depth buffer is used to make sure that objects closer to the camera occlude/obscure objects that are behind it
 	std::vector<float> depthBuffer;
 	frameBuffer.resize(width * height * 4, 0);
@@ -252,7 +264,7 @@ std::vector<unsigned char> rasterise(std::vector<Mesh> &meshes, unsigned int wid
 	float3 boundingBoxDimensions = boundingBoxMax - boundingBoxMin;
 	float largestBoundingBoxSide = std::max(std::max(boundingBoxDimensions.x, boundingBoxDimensions.y), boundingBoxDimensions.z);
 
-	renderMeshFractal(meshes, transformedMeshes, width, height, frameBuffer, depthBuffer, largestBoundingBoxSide, depthLimit);//depthLimit);
+	renderMeshFractal(meshes, transformedMeshes, width, height, frameBuffer, depthBuffer, largestBoundingBoxSide, depthLimit,count);//depthLimit);
 
 
 	std::cout << "finished!" << std::endl;
