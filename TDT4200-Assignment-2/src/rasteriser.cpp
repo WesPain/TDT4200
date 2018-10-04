@@ -159,44 +159,44 @@ void renderMeshFractal(
 				float scale = 1.0,
 				float3 distanceOffset = {0, 0, 0}
 			) {
+			//Count variable used to keep track over the number of times the
+			//recursive function is called
+ 			++count;
 
- 						++count;
-
-						funcCount++;
-						int world_rank;
-						MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-						int world_size;
-						MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+			funcCount++;
+			//MPI stuff
+			int world_rank;
+			MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+			int world_size;
+			MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 						//std::cout << "function counter: " << funcCount << std::endl;
 						//std::cout << "counter: " << count << std::endl;
 						//std::cout << "world_rank: "<< world_rank << std::endl;
 						//std::cout << "world_size: " << world_size <<std::endl;
-
-						if(world_size>1){
-								if(world_rank==0){
-
-									for(int i=1; i<world_size; i++){
-										int count_send = count;
-										MPI_Send(&count_send, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-
-									}
-								}
-								else{
-									MPI_Recv(&count, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-								}
-							}
+			//To syncronize
+			if(world_size>1){
+				if(world_rank==0){
+					for(int i=1; i<world_size; i++){
+							int count_send = count;
+							MPI_Send(&count_send, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+						}
+					}
+					else{
+						MPI_Recv(&count, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+					}
+				}
+	//By using modulo we can evenly allocate the workload between the MPI ranks
   if(count % world_size == world_rank){
-								//std::cout << "Process: "<< world_rank << " is drawing"<< std::endl;
-								//std::cout << "counter: " << count << std::endl;
+	//std::cout << "Process: "<< world_rank << " is drawing"<< std::endl;
+	//std::cout << "counter: " << count << std::endl;
 	// Start by rendering the mesh at this depth
-	for (unsigned int i = 0; i < meshes.size(); i++) {
-		Mesh &mesh = meshes.at(i);
-		Mesh &transformedMesh = transformedMeshes.at(i);
-		runVertexShader(mesh, transformedMesh, distanceOffset, scale, width, height);
-		rasteriseTriangles(transformedMesh, frameBuffer, depthBuffer, width, height);
-	}}
-	//Legge til en variable som sjekker modulo hvis sann tegn og kall funskjon hvis falsk ikke tegn og kall funksjon
-	//Huske å enkapsulere finksjonene
+		for (unsigned int i = 0; i < meshes.size(); i++) {
+			Mesh &mesh = meshes.at(i);
+			Mesh &transformedMesh = transformedMeshes.at(i);
+			runVertexShader(mesh, transformedMesh, distanceOffset, scale, width, height);
+			rasteriseTriangles(transformedMesh, frameBuffer, depthBuffer, width, height);
+		}
+	}
 
 	// Check whether we've reached the recursive depth of the fractal we want to reach
 	depthLimit--;
@@ -223,8 +223,7 @@ void renderMeshFractal(
 				renderMeshFractal(meshes, transformedMeshes, width, height, frameBuffer, depthBuffer, largestBoundingBoxSide, depthLimit, count,smallerScale, displacedOffset);
 			}
 		}
-	}//}
-
+	}
 }
 
 // This function kicks off the rasterisation process.
